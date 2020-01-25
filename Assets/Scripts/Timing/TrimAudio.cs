@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using NAudio.Vorbis;
 using NAudio.Wave;
@@ -21,6 +22,7 @@ namespace NotReaper.Timing {
         //negative offset = trim the song
 
         Process ffmpeg = new Process();
+        NumberFormatInfo nfi = new NumberFormatInfo();
 
         public TrimAudio() {
             string ffmpegPath = Path.Combine(Application.streamingAssetsPath, "FFMPEG", "ffmpeg.exe");
@@ -34,6 +36,7 @@ namespace NotReaper.Timing {
         public void SetAudioLength(string path, string output, int offset, double bpm, bool skipRetime = false) {
 
             string log = "";
+            nfi.NumberDecimalSeparator = ".";
             double offsetMs = TicksToMs(offset, bpm);
             double magicOctoberOffsetFix = 25.0f;
             double ms = Math.Abs(GetOffsetMs(offsetMs, bpm)) - magicOctoberOffsetFix;
@@ -45,8 +48,7 @@ namespace NotReaper.Timing {
             }
 
             else {
-				args = String.Format("-y -i \"{0}\" -af \"adelay={1}|{1}\" -map 0:a \"{2}\"", path, ms, output);
-	            
+				args = String.Format("-y -i \"{0}\" -af \"adelay={1}|{1}\" -map 0:a \"{2}\"", path, ms.ToString(nfi), output);
             }
             
             Debug.Log($"Running ffmpeg with args {args}");
